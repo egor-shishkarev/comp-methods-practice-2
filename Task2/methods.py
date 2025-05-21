@@ -76,4 +76,5 @@ def solve_QR(Q, R, b):
         for j in range(i + 1, len(b)):
             sum += R[i][j] * x[j]
         x[i] = (y[i] - sum) / R[i][i]
+
     return x.tolist()

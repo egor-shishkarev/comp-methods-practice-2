@@ -49,3 +49,4 @@ for matrix, b in matrices:
         print(f"Число обусловленности матрицы {name[0]}: {cond_first_matrix}")
         print(f"Число обусловленности матрицы {name[1]}: {cond_second_matrix}")
         input()
+    print('=' * 50 + '\n')
