@@ -1,49 +1,51 @@
-# Реализовать два метода решения СЛАУ: «LU» и «QR»
-# Проверить ответ
-# Для матрицы А и матриц получившегося разложения вычислить числа обусловленности, сравнить их
-# Протестировать на матрицах: хорошо обусловенных, [очень] плохо обусловенных
 from methods import *
 from utils import *
 from matrices import *
 import numpy
 
-print('Задание 2. Точные методы решения СЛАУ')
+print('Задание 2. Точные методы решения СЛАУ\n')
 
-# Создаем список пар (матрица, вектор правой части)
 matrices = [
     (matrix_1, b_1),
     (matrix_2, b_2),
     (matrix_3, b_3)
 ]
 
-for matrix, b in matrices:
-    print("Матрица A:")
-    print_matrix(matrix)
-    
-    L, U = LU(matrix)
-    print("\nМатрица L:")
-    print_matrix(L)
-    print("\nМатрица U:")
-    print_matrix(U)
-    
-    x = solve_LU(L, U, b)
-    print("\nРешение x:")
-    print(x)
-    
-    b_calc = matvec(matrix, x)
-    print("\nПравая часть b:")
-    print(b)
-    print("\nВычисленная правая часть (Ax):")
-    print(b_calc)
-    
-    error = numpy.linalg.norm(numpy.array(b) - b_calc)
-    print(f"\nНорма отклонения: {error}")
+methods = [
+    (LU, solve_LU, "LU"),
+    (QR, solve_QR, "QR")
+]
 
-    cond_A = numpy.linalg.cond(matrix)
-    cond_L = numpy.linalg.cond(L)
-    cond_U = numpy.linalg.cond(U)
-    print(f"\nЧисло обусловленности матрицы A: {cond_A}")
-    print(f"Число обусловленности матрицы L: {cond_L}")
-    print(f"Число обусловленности матрицы U: {cond_U}")
-    print("\n" + "="*50)
-    input()
+for matrix, b in matrices:
+    for get_matrices, solve, name in methods:
+
+        print("Матрица A:")
+        print_matrix(matrix)
+        
+        print(f"\n============ {name} разложение ============")
+        first_matrix, second_matrix = get_matrices(matrix)
+        print(f"\nМатрица {name[0]}:")
+        print_matrix(first_matrix)
+        print(f"\nМатрица {name[1]}:")
+        print_matrix(second_matrix)
+        
+        x = solve(first_matrix, second_matrix, b)
+        print(f"\nРешение x ({name}):")
+        print(x)
+        
+        b_calc = numpy.dot(matrix, x)
+        print("\nПравая часть b:")
+        print(b)
+        print(f"\nВычисленная правая часть (Ax) для {name}:")
+        print(b_calc)
+        
+        inaccuracy = numpy.linalg.norm(numpy.array(b) - b_calc)
+        print(f"\nНорма отклонения для {name}: {inaccuracy}")
+        
+        cond_A = numpy.linalg.cond(matrix)
+        cond_first_matrix = numpy.linalg.cond(first_matrix)
+        cond_second_matrix = numpy.linalg.cond(second_matrix)
+        print(f"\nЧисло обусловленности матрицы A: {cond_A}")
+        print(f"Число обусловленности матрицы {name[0]}: {cond_first_matrix}")
+        print(f"Число обусловленности матрицы {name[1]}: {cond_second_matrix}")
+        input()

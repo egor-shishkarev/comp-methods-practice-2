@@ -38,3 +38,42 @@ def solve_LU(L, U, b):
         x[i] = (y[i] - sum) / U[i][i]
 
     return x.tolist()
+
+def QR(A: List[List[float]]):
+    A = numpy.array(A, dtype=float)
+    n, m = A.shape
+    Q = numpy.eye(n)
+    R = A.copy()
+
+    for j in range(n):
+        for i in range(m - 1, j, -1):
+            a = R[j, j]
+            b = R[i, j]
+            r = numpy.sqrt(a**2 + b**2)
+            c = a / r
+            s = -b / r
+
+            for k in range(j, n):
+                t1 = R[j, k]
+                t2 = R[i, k]
+                R[j, k] = c * t1 - s * t2
+                R[i, k] = s * t1 + c * t2
+
+            for k in range(m):
+                t1 = Q[k, j]
+                t2 = Q[k, i]
+                Q[k, j] = c * t1 - s * t2
+                Q[k, i] = s * t1 + c * t2
+
+    return Q, R
+
+def solve_QR(Q, R, b):
+    y = numpy.dot(Q.T, b)
+
+    x = numpy.zeros(len(b))
+    for i in range(len(b) - 1, -1, -1):
+        sum = 0
+        for j in range(i + 1, len(b)):
+            sum += R[i][j] * x[j]
+        x[i] = (y[i] - sum) / R[i][i]
+    return x.tolist()
