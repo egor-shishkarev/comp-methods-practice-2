@@ -4,7 +4,7 @@ from methods import *
 from utils import *
 from matrices import *
 
-print('Задание 1. Числа обусловленности')
+print('Задание 1. Числа обусловленности\n')
 
 N = 5
 
