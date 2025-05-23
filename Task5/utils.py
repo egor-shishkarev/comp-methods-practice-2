@@ -19,3 +19,10 @@ def create_random_matrix(rows: int, columns: int = None):
         matrix.append(row)
 
     return matrix
+
+def print_gershgorin_circles(centers, radii):
+    print("Круги Гершгорина: \n")
+    for i in range(len(centers)):
+        print(f"|z - {centers[i]}| < {radii[i]}")
+
+    print()

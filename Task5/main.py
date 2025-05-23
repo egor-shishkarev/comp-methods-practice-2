@@ -30,6 +30,7 @@ for A in matrices:
     print_matrix(A)
     eigenvalues_accurate, _ = numpy.linalg.eig(A)
     eigenvalues_accurate.sort()
+    centers, radii = get_gershgorin_circles(A)
     for epsilon in epsilons:
         print(f"\n============ Точность: {epsilon} ============\n")
         print(f"Точные значения собственных чисел: - {eigenvalues_accurate}\n")
@@ -38,6 +39,7 @@ for A in matrices:
             eigenvalues_max_method, iterations = jacobi_method(A, epsilon)
             eigenvalues_max_method_sorted = sorted(eigenvalues_max_method.tolist())
             print("======= Наибольший недиагональный элемент =======\n")
+            print_gershgorin_circles(centers, radii)
             print(f"Собственные значения: {eigenvalues_max_method_sorted}")
             print(f"Количество итераций: {iterations}")
             print(f"Погрешность: {eigenvalues_max_method_sorted - eigenvalues_accurate}\n")
@@ -48,6 +50,7 @@ for A in matrices:
             eigenvalues_opt_method, iterations = jacobi_method(A, epsilon, True)
             eigenvalues_opt_method_sorted = sorted(eigenvalues_opt_method.tolist())
             print("======= Стратегия оптимального элемента =======\n")
+            print_gershgorin_circles(centers, radii)
             print(f"Собственные значения: {eigenvalues_opt_method_sorted}")
             print(f"Количество итераций: {iterations}")
             print(f"Погрешность: {eigenvalues_opt_method_sorted - eigenvalues_accurate}\n")

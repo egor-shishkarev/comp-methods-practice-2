@@ -10,7 +10,7 @@ def jacobi_method(A, epsilon, is_optimal=False):
 
     method = get_optimal_element if is_optimal else get_max_off_diagonal
 
-    while (not is_all_gergoshin_radiuses_fit(A, epsilon)):
+    while (not is_all_gershgorin_radiuses_fit(A, epsilon)):
         i, j = method(A)
 
         R = get_rotation_matrix(A, i, j)
@@ -96,7 +96,7 @@ def get_gershgorin_radius(A, i):
     return sum
 
 
-def is_all_gergoshin_radiuses_fit(A, epsilon):
+def is_all_gershgorin_radiuses_fit(A, epsilon):
     A = numpy.array(A)
     n = A.shape[0]
 
@@ -113,3 +113,11 @@ def sign(x):
         return -1
     else:
         return 0
+    
+def get_gershgorin_circles(A): 
+    A = numpy.array(A)
+    n = A.shape[0]
+    centers = A.diagonal()
+    radii = [get_gershgorin_radius(A, i) for i in range(n)]
+
+    return centers, radii
