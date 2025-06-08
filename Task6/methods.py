@@ -1,14 +1,11 @@
-import numpy as np
-from scipy.linalg import norm
+from equations import BoundaryTask
 
 def generate_grid(a, b, n):
-    """Генерирует равномерную сетку с n+1 точками на [a,b]"""
     h = (b - a) / n
     x_values = {i: a + i * h for i in range(n + 1)}
     return h, x_values
 
-def setup_tridiagonal_system(problem, n, h, x_values):
-    """Настройка коэффициентов для трехдиагональной системы"""
+def setup_tridiagonal_system(problem: BoundaryTask, n, h, x_values):
     A = {}  # Коэффициенты для u_{i-1}
     B = {}  # Коэффициенты для u_i
     C = {}  # Коэффициенты для u_{i+1}
@@ -17,54 +14,49 @@ def setup_tridiagonal_system(problem, n, h, x_values):
     for i in range(n + 1):
         x_i = x_values[i]
 
-        if i == 0:  # Левая граница
+        if i == 0:
             A[i] = 0
-            B[i] = h * problem.alpha_1 + problem.alpha_2
+            B[i] = problem.alpha_1
             C[i] = problem.alpha_2
-            G[i] = -h * problem.alpha
-        elif i == n:  # Правая граница
-            A[i] = problem.beta_2
-            B[i] = h * problem.beta_1 + problem.beta_2
+            G[i] = problem.alpha
+        elif i == n:
+            A[i] = - problem.beta_2 / h
+            B[i] = problem.beta_1
             C[i] = 0
-            G[i] = -h * problem.beta
-        else:  # Внутренний узел
-            A[i] = problem.p_func(x_i) - problem.q_func(x_i) * h / 2
-            C[i] = problem.p_func(x_i) + problem.q_func(x_i) * h / 2
-            B[i] = A[i] + C[i] - (h ** 2) * problem.r_func(x_i)
-            G[i] = h ** 2 * problem.f_func(x_i)
+            G[i] = problem.beta
+        else:
+            A[i] = 1 / h ** 2 - problem.q_func(x_i) / (2 * h)
+            C[i] = 1 / h ** 2  + problem.q_func(x_i) / (2 * h)
+            B[i] = - 2 / (h ** 2) - problem.r_func(x_i)
+            G[i] = problem.f_func(x_i)
 
     return A, B, C, G
 
 def thomas_algorithm(A, B, C, G, n):
-    """
-    Решение трехдиагональной системы методом прогонки (алгоритм Томаса)
-    """
-    # Прямая прогонка: вычисляем коэффициенты s и t
+    # Прямая прогонка
     s = {}  # Коэффициенты s_i для u_i = s_i * u_{i+1} + t_i
     t = {}  # Коэффициенты t_i
 
     for i in range(n + 1):
         if i == 0:
             s[i] = C[i] / B[i]
-            t[i] = -G[i] / B[i]
+            t[i] = G[i] / B[i]
         else:
-            s[i] = C[i] / (B[i] - A[i] * s[i - 1])
-            t[i] = (A[i] * t[i - 1] - G[i]) / (B[i] - A[i] * s[i - 1])
+            denom = (B[i] - A[i] * s[i - 1])
+            s[i] = C[i] / denom
+            t[i] = (G[i] - A[i] * t[i - 1]) / denom
 
-    # Обратная прогонка: вычисляем значения решения
+    # Обратная прогонка
     u = {}
     for i in range(n, -1, -1):
         if i == n:
             u[i] = t[i]
         else:
-            u[i] = s[i] * u[i + 1] + t[i]
+            u[i] = t[i] - s[i] * u[i + 1]
 
     return u
 
 def calculate_richardson_error(u_current, u_previous, n):
-    """
-    Вычисление погрешности по методу Ричардсона
-    """
     max_error = -1
     u_improved = u_current.copy()
 
@@ -78,9 +70,6 @@ def calculate_richardson_error(u_current, u_previous, n):
     return max_error, u_improved
 
 def solve_bvp(problem, n_start=10, n_max=10 ** 6, tol=1e-6):
-    """
-    Решение краевой задачи методом конечных разностей с экстраполяцией Ричардсона
-    """
     n = n_start
     errors = {}
     u_values_prev = {}

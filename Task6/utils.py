@@ -1,45 +1,41 @@
-from prettytable import PrettyTable
 import matplotlib.pyplot as plt
+import numpy as np
+from equations import BoundaryTask
 
-class ConsoleHelper:
-    def __init__(self, x_values, u_values, errors, n):
-        self.x_values = x_values
-        self.u_values = u_values
-        self.errors = errors
-        self.n = n
-
-    def __str__(self):
-        table = PrettyTable(['Кол-во делений отрезка', 'Максимальная погрешность'])
-        for n, error in self.errors.items():
-            table.add_row([n, error])
-        
-        s = f"Результаты решения краевой задачи:\n"
-        s += f"Количество делений отрезка: {self.n}\n"
-        s += f"Таблица погрешностей:\n{table}\n"
-        return s 
-    
-def plot_error(errors, title_add):
-    """Построение графика зависимости погрешности от размера сетки"""
+def plot_error(errors):
     plt.figure(figsize=(10, 6))
-    plt.title('Зависимость погрешности от кол-ва делений' + title_add)
+    plt.title("Зависимость погрешности от кол-ва делений")
     plt.xlabel('Количество делений отрезка')
     plt.ylabel('Погрешность')
-    plt.xscale('log', base=10)
-    plt.yscale('log', base=10)
+    plt.xscale('log', base = 10)
+    plt.yscale('log', base = 10)
     plt.grid(True)
     plt.plot(sorted(errors.keys()), [errors[i] for i in sorted(errors.keys())], 'o-')
     plt.show()
 
-def plot_solution(x_values, u_values, title_add):
-    """Построение графика численного решения"""
+def plot_solution(problem, x_values, u_values):
     plt.figure(figsize=(10, 6))
-    plt.title(f'Приближение функции u(x)' + title_add)
+    
+    # Построение численного решения
+    x_numerical = [x_values[i] for i in range(len(x_values))]
+    u_numerical = [u_values[i] for i in range(len(u_values))]
+
+    plt.plot(x_numerical, u_numerical, 'o-', label='Численное')
+    
+    # Построение точного решения
+    x_exact = np.linspace(problem.a, problem.b, 1000)
+    plt.plot(x_exact, problem.u_exact(x_exact), '--', label='Точное')
+    
     plt.xlabel('x')
-    plt.ylabel('u')
+    plt.ylabel('u(x)')
+    plt.title('Решение краевой задачи')
+    plt.legend()
     plt.grid(True)
+    plt.show()
 
-    x = [x_values[i] for i in range(len(x_values))]
-    u = [u_values[i] for i in range(len(x_values))]
-
-    plt.plot(x, u)
-    plt.show() 
+def print_table(inaccuracies):
+    print()
+    print("|{:^20}|{:^25}|".format("Кол-во делений", "Макс. погрешность"))
+    print("-" * 46)
+    for n, inaccuracy in inaccuracies.items():
+        print("|{:^20}|{:^25.15e}|".format(n, inaccuracy))
